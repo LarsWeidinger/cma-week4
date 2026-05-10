@@ -144,3 +144,57 @@ ggplot(ruth) +
   theme_minimal() # since I prefer this
 ```
 
+# Task 4: Segment-based analysis
+```{r}
+# function to create unique IDs
+rle_id <- function(vec) {
+    x <- rle(vec)$lengths
+    as.factor(rep(seq_along(x), times = x))
+}
+```
+
+```{r}
+# create unique IDs
+ruth <- ruth |>
+    mutate(segment_id = rle_id(static))
+```
+
+```{r}
+ggplot(ruth) +
+  geom_path(aes(x = E, y = N, colour = segment_id, group = segment_id), linewidth = 0.5) +
+  geom_point(aes(x = E, y = N, colour = segment_id), size = 0.8) +
+  coord_equal() +
+  labs(
+    title = "Trajectory segments of Ruth",
+    x = "E",
+    y = "N",
+    colour = "Segment ID"
+  ) +
+  theme_minimal() # since I prefer this
+```
+
+```{r}
+# calculate duration for each segment
+segment_duration <- ruth |>
+  group_by(segment_id, static) |>
+  summarise(
+    start_time = min(DatetimeUTC),
+    end_time   = max(DatetimeUTC),
+    duration_mins = as.numeric(
+      difftime(end_time, start_time, units = "mins")
+    ),
+    n = n(),
+    .groups = "drop"
+  )
+```
+
+```{r}
+# remove short segments, keep only segments 5+ minutes
+long_segments <- segment_duration |>
+  filter(duration_mins >= 5)
+
+ruth_filtered <- ruth |>
+  filter(segment_id %in% long_segments$segment_id)
+```
+
+
