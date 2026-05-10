@@ -120,19 +120,27 @@ ruth_threshold <- mean(ruth$stepMean, na.rm = TRUE) # do not use the NA values
 ```
 
 ```{r}
+# use the mean step length as the mean
 ruth <- ruth |>
     mutate(static = stepMean < mean(stepMean, na.rm = TRUE))
-
-ruth_filter <- ruth |>
-    filter(!static)
-
-ruth_filter |>
-    ggplot(aes(E, N)) +
-    geom_point(data = ruth, col = "red") +
-    geom_path() +
-    geom_point() +
-    coord_fixed() +
-    theme(legend.position = "bottom")
 ```
 
+# Task 3: Visualize segmented trajectories
+```{r}
+ggplot(ruth) +
+  geom_path(aes(x = E, y = N, colour = static), linewidth = 0.5) +
+  geom_point(aes(x = E, y = N, colour = static), size = 0.8) +
+  coord_equal() +
+  scale_colour_manual(
+    values = c("TRUE" = "purple", "FALSE" = "orange"),
+    labels = c("TRUE" = "Static", "FALSE" = "Movement")
+  ) +
+  labs(
+    title = "Segmented trajectory of Ruth",
+    x = "E",
+    y = "N",
+    colour = "Behaviour"
+  ) +
+  theme_minimal() # since I prefer this
+```
 
