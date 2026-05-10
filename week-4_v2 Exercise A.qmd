@@ -100,5 +100,23 @@ ruth <- ruth |>
     )
 ```
 
+```{r}
+# calculate mean distance
+ruth <- ruth |>
+    rowwise() |>
+    mutate(
+        stepMean = mean(c(nMinus2, nMinus1, nPlus1, nPlus2))
+    ) |>
+    ungroup()
+
+ruth
+```
+
+
+
+# Task 2: Specify and apply threshold d
+```{r}
+
+```
 
 
