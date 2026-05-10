@@ -1,0 +1,93 @@
+---
+title: "GEO 880 - week 4 v2 - Exercise B: Similarity"
+author: "Lars Weidinger"
+date: "today"
+format: 
+  html:
+    fig_caption: true
+    fig-align: center
+    highlight: tango
+    number-sections: false
+    code-fold: true
+    theme: lumen
+    embed-resources: true
+    toc: true
+    toc_depth: 2
+    toc_float: true
+execute:                      # Set global options for execution of code blocks
+  echo: true                  # False = no code printed
+  warning: false
+  message: false
+editor: visual
+---
+
+<!-- The following html code fragment produces fully justified text alignment -->
+
+```{=html}
+<style>
+body {text-align: justify}
+</style>
+```
+
+# Preliminaries
+
+## Set Options
+
+```{r}
+options(warning = FALSE)    # Don't show warnings
+```
+
+## Install or Load packages
+
+```{r}
+#| code-fold: show
+library(pacman)
+
+# Load and if not found in the library will attempt to install the package
+pacman::p_load(here,
+               sf,
+               readr,
+               tmap,
+               dplyr,
+               ggplot2,
+               tidyr,
+               install = TRUE)
+```
+
+## Store relevant CRS
+
+```{r}
+crs_lv03  <- 21781
+crs_lv95  <- 2056
+crs_wgs84 <- 4326
+```
+
+# Task 1: Similarity measures
+
+## Load & Prepare Data
+```{r}
+pedestrian <- read.csv("data/pedestrian.csv")
+```
+
+# Plot Trajectories
+```{r}
+ggplot(pedestrian) +
+  geom_path(aes(x = E, y = N, colour = TrajID), linewidth = 0.5) +
+  geom_point(aes(x = E, y = N, colour = TrajID), size = 0.8) +
+  coord_equal() + # preserves the spatial aspect ratio in every subplot
+  facet_wrap(~TrajID, ncol = 3) + # creates separate subplots for each trajectory with 3 columns
+  labs(
+    title = "Six pedestrian trajectories",
+    x = "E",
+    y = "N",
+    colour = "Traj ID"
+  ) +
+  theme_minimal() # since I prefer this
+```
+
+# Task 2: Calculate similarity
+
+```{r}
+
+```
+
