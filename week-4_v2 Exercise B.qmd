@@ -51,6 +51,7 @@ pacman::p_load(here,
                dplyr,
                ggplot2,
                tidyr,
+               SimilarityMeasures,
                install = TRUE)
 ```
 
@@ -66,7 +67,10 @@ crs_wgs84 <- 4326
 
 ## Load & Prepare Data
 ```{r}
-pedestrian <- read.csv("data/pedestrian.csv")
+pedestrian <- read_delim("data/pedestrian.csv", ",")
+
+pedestrian<- pedestrian |>
+  mutate(Datetime_int = as.integer(DatetimeUTC)) # turn Datetime column from POSIXct to integer
 ```
 
 # Plot Trajectories
@@ -87,7 +91,146 @@ ggplot(pedestrian) +
 
 # Task 2: Calculate similarity
 
+## Create indiivudal objects
 ```{r}
+traj1 <- pedestrian |>
+  filter(TrajID == 1) |>
+  dplyr::select(E, N, Datetime_int) |>
+  as.matrix()
 
+traj2 <- pedestrian |>
+  filter(TrajID == 2) |>
+  dplyr::select(E, N, Datetime_int) |>
+  as.matrix()
+
+traj3 <- pedestrian |>
+  filter(TrajID == 3) |>
+  dplyr::select(E, N, Datetime_int) |>
+  as.matrix()
+
+traj4 <- pedestrian |>
+  filter(TrajID == 4) |>
+  dplyr::select(E, N, Datetime_int) |>
+  as.matrix()
+
+traj5 <- pedestrian |>
+  filter(TrajID == 5) |>
+  dplyr::select(E, N, Datetime_int) |>
+  as.matrix()
+
+traj6 <- pedestrian |>
+  filter(TrajID == 6) |>
+  dplyr::select(E, N, Datetime_int) |>
+  as.matrix()
 ```
 
+I think 2 and 3 are really similar.  
+Maybe 2 and 4 are the least similar.  
+
+## Dynamic Time Warp
+```{r}
+dtw_1_2 <- SimilarityMeasures::DTW(traj1, traj2)
+
+dtw_1_3 <- SimilarityMeasures::DTW(traj1, traj3)
+
+dtw_1_4 <- SimilarityMeasures::DTW(traj1, traj4)
+
+dtw_1_5 <- SimilarityMeasures::DTW(traj1, traj5)
+
+dtw_1_6 <- SimilarityMeasures::DTW(traj1, traj6)
+```
+
+## Edit Distance
+```{r}
+editDist_1_2 <- SimilarityMeasures::EditDist(traj1, traj2, pointDistance = 20)
+
+editDist_1_3 <- SimilarityMeasures::EditDist(traj1, traj3, pointDistance = 20)
+
+editDist_1_4 <- SimilarityMeasures::EditDist(traj1, traj4, pointDistance = 20)
+
+editDist_1_5 <- SimilarityMeasures::EditDist(traj1, traj5, pointDistance = 20)
+
+editDist_1_6 <- SimilarityMeasures::EditDist(traj1, traj6, pointDistance = 20)
+```
+
+## Frechet
+```{r}
+frechet_1_2 <- SimilarityMeasures::Frechet(traj1, traj2)
+
+frechet_1_3 <- SimilarityMeasures::Frechet(traj1, traj3)
+
+frechet_1_4 <- SimilarityMeasures::Frechet(traj1, traj4)
+
+frechet_1_5 <- SimilarityMeasures::Frechet(traj1, traj5)
+
+frechet_1_6 <- SimilarityMeasures::Frechet(traj1, traj6)
+```
+
+## Longest Common Subsequence (LCSS)
+```{r}
+# to make it more efficient we can use a small number in pointSpacing instead of -1 (=infinite)
+
+lcss_1_2 <- SimilarityMeasures::LCSS(traj1, traj2, pointSpacing = 3, pointDistance = 20)
+
+lcss_1_3 <- SimilarityMeasures::LCSS(traj1, traj3, pointSpacing = 3, pointDistance = 20)
+
+lcss_1_4 <- SimilarityMeasures::LCSS(traj1, traj4, pointSpacing = 3, pointDistance = 20)
+
+lcss_1_5 <- SimilarityMeasures::LCSS(traj1, traj5, pointSpacing = 3, pointDistance = 20)
+
+lcss_1_6 <- SimilarityMeasures::LCSS(traj1, traj6, pointSpacing = 3, pointDistance = 20)
+```
+
+## Visualisation
+
+### DTW
+```{r}
+ggplot(
+  data.frame(
+    comparison = c("2", "3", "4", "5", "6"),
+    dtw = c(dtw_1_2, dtw_1_3, dtw_1_4, dtw_1_5, dtw_1_6)
+  ),
+  aes(x = comparison, y = dtw, fill = comparison)
+) +
+  geom_col() +
+  theme_minimal()
+```
+
+### editDist
+```{r}
+ggplot(
+  data.frame(
+    comparison = c("2", "3", "4", "5", "6"),
+    dtw = c(editDist_1_2, editDist_1_3, editDist_1_4, editDist_1_5, editDist_1_6)
+  ),
+  aes(x = comparison, y = dtw, fill = comparison)
+) +
+  geom_col() +
+  theme_minimal()
+```
+
+### Frechet
+```{r}
+ggplot(
+  data.frame(
+    comparison = c("2", "3", "4", "5", "6"),
+    dtw = c(frechet_1_2, frechet_1_3, frechet_1_4, frechet_1_5, frechet_1_6)
+  ),
+  aes(x = comparison, y = dtw, fill = comparison)
+) +
+  geom_col() +
+  theme_minimal()
+```
+
+### LCSS
+```{r}
+ggplot(
+  data.frame(
+    comparison = c("2", "3", "4", "5", "6"),
+    dtw = c(lcss_1_2, lcss_1_3, lcss_1_4, lcss_1_5, lcss_1_6)
+  ),
+  aes(x = comparison, y = dtw, fill = comparison)
+) +
+  geom_col() +
+  theme_minimal()
+```
